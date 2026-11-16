@@ -1,0 +1,22 @@
+{
+ "name": "It's Not Too Late, Mama: 21 Days",
+ "short_name": "21 Days, Mama",
+ "start_url": "./",
+ "scope": "./",
+ "display": "standalone",
+ "background_color": "#FAF2E6",
+ "theme_color": "#5A3A2E",
+ "icons": [
+  {
+   "src": "icon-192.png",
+   "sizes": "192x192",
+   "type": "image/png"
+  },
+  {
+   "src": "icon-512.png",
+   "sizes": "512x512",
+   "type": "image/png",
+   "purpose": "any maskable"
+  }
+ ]
+}
