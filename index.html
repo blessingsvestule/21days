@@ -75,6 +75,7 @@ input.in{width:100%;font:16px Poppins,sans-serif;padding:12px 14px;border:1px so
 .help li{margin-bottom:6px}
 .small{font-family:Poppins,sans-serif;font-size:12px;color:var(--muted);line-height:1.5}
 .wk{font-family:Poppins,sans-serif;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-top:14px}
+.card.install{border-color:var(--terra);border-width:1.5px}
 .toast{position:fixed;left:50%;top:calc(14px + env(safe-area-inset-top));transform:translateX(-50%);background:var(--cocoa2);color:#fff;font-family:Poppins,sans-serif;font-size:13px;padding:10px 16px;border-radius:999px;opacity:0;transition:.25s;pointer-events:none;z-index:9}
 .toast.show{opacity:1}
 </style>
@@ -105,6 +106,16 @@ input.in{width:100%;font:16px Poppins,sans-serif;padding:12px 14px;border:1px so
 <!-- TODAY -->
 <section id="today" class="hidden">
   <div class="top"><div class="brand">21 Days, Mama</div><div class="greet" id="greet"></div></div>
+  <div class="card install hidden" id="installCard">
+    <div class="label">Put this app on your phone</div>
+    <p style="margin:6px 0 10px">Install it once, and it opens like any app on your phone, with your daily note one tap away.</p>
+    <div id="instAndroid" class="hidden"><button class="btn primary" id="installBtn">Install the app</button></div>
+    <ol class="small" id="instManual" style="margin:0 0 6px 18px;padding:0">
+      <li><b>Android (Chrome):</b> tap <b>&#8942;</b> (top right), then <i>Add to Home screen</i> or <i>Install app</i>.</li>
+      <li><b>iPhone (Safari):</b> tap the <b>Share</b> button, then <i>Add to Home Screen</i>.</li>
+    </ol>
+    <div class="row" style="margin-top:8px"><button class="btn" id="installLater">I&rsquo;ve done it / Later</button></div>
+  </div>
   <div class="card">
     <div class="day-head">
       <button class="nav-btn" id="prev" aria-label="Previous day">‹</button>
@@ -337,6 +348,18 @@ $("theme").onclick=()=>{ const dark = getComputedStyle(document.documentElement)
 document.querySelectorAll("nav.tabs button").forEach(b=>b.onclick=()=>{ if(b.dataset.t==="today") cur=Math.max(0,unlocked()); show(b.dataset.t); });
 applyTheme();
 if(sget("start",null)){ cur=Math.max(0,unlocked()); show("today"); } else show("welcome");
+
+/* install prompt */
+(function(){
+  const standalone = (window.matchMedia && matchMedia("(display-mode: standalone)").matches) || navigator.standalone===true;
+  let deferred=null;
+  function refresh(){ const c=$("installCard"); if(!c) return; c.classList.toggle("hidden", standalone || sget("installDismissed",false)); }
+  window.addEventListener("beforeinstallprompt", e=>{ e.preventDefault(); deferred=e; $("instAndroid").classList.remove("hidden"); $("instManual").classList.add("hidden"); });
+  window.addEventListener("appinstalled", ()=>{ sset("installDismissed",true); refresh(); toast("Installed. Find it on your home screen."); });
+  $("installBtn").onclick=async()=>{ if(!deferred) return; deferred.prompt(); try{ const r=await deferred.userChoice; if(r.outcome==="accepted"){ sset("installDismissed",true); refresh(); } }catch(e){} deferred=null; };
+  $("installLater").onclick=()=>{ sset("installDismissed",true); refresh(); };
+  refresh();
+})();
 if("serviceWorker" in navigator && location.protocol==="https:"){ navigator.serviceWorker.register("sw.js").catch(()=>{}); }
 </script>
 </body>
